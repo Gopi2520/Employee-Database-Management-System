@@ -7,7 +7,7 @@ if (loginForm) {
         const password = document.getElementById("password").value;
 
         try {
-            const response = await fetch("http://localhost:8081/login", {
+            const response = await fetch("/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password })
@@ -15,10 +15,10 @@ if (loginForm) {
 
             const data = await response.json();
             if (data.success) {
-                window.location.href = "http://localhost:8081" + data.redirect;
+                window.location.href = window.location.origin + data.redirect;
             } else {
                 alert("Invalid credentials. Please try again.");
-                window.location.href = "http://localhost:8081" + data.redirect;
+                window.location.href = window.location.origin + data.redirect;
             }
         } catch (error) {
             console.error("Error:", error);
@@ -86,8 +86,6 @@ function renderEmployeeList(container, employees, title, emptyMessage) {
 }
 
 // ===== VIEW OR FETCH EMPLOYEE =====
-// Clicking viewBtn will either search-by-name (used on viewEmployee.html)
-// or fetch a single employee by ID (used on updateEmployee.html).
 const viewBtn = document.getElementById('viewBtn');
 if (viewBtn) {
     viewBtn.addEventListener('click', async () => {
@@ -103,13 +101,10 @@ if (viewBtn) {
                 return;
             }
             try {
-                // backend should expose an endpoint that returns a single employee by id
-                // adjust path if your server uses a different convention
-                const response = await fetch(`http://localhost:8081/getEmployeeById/${encodeURIComponent(id)}`);
+                const response = await fetch(`/getEmployeeById/${encodeURIComponent(id)}`);
                 if (!response.ok) throw new Error('Employee not found');
                 const emp = await response.json();
 
-                // render update form (this duplicates previous updateBtn logic)
                 detailsDiv.innerHTML = `
         <h2>Update Employee</h2>
         <form id="updateForm">
@@ -145,7 +140,7 @@ if (viewBtn) {
                         salary: document.getElementById('salary').value
                     };
 
-                    const updateResponse = await fetch(`http://localhost:8081/updateEmployee/${id2}`, {
+                    const updateResponse = await fetch(`/updateEmployee/${id2}`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(updatedEmployee)
@@ -165,10 +160,10 @@ if (viewBtn) {
             return;
         }
 
-        // fall back to name-search (used on viewEmployee.html)
+        // fall back to name-search
         const empName = document.getElementById('empname').value;
         try {
-            const response = await fetch(`http://localhost:8081/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
+            const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
             if (!response.ok) throw new Error('Server error: ' + response.status);
             const employees = await response.json();
             renderEmployeeList(detailsDiv, employees, 'Matching Employees', `No employees found with name "${empName}".`);
@@ -184,7 +179,7 @@ if (viewAllBtn) {
     viewAllBtn.addEventListener('click', async () => {
         const detailsDiv = document.getElementById('employeeDetails');
         try {
-            const response = await fetch('http://localhost:8081/viewAllEmployees');
+            const response = await fetch('/viewAllEmployees');
             if (!response.ok) throw new Error('Server error: ' + response.status);
             const employees = await response.json();
             renderEmployeeList(detailsDiv, employees, 'All Employees', 'No employees found.');
@@ -208,7 +203,7 @@ if (delBtn) {
         }
 
         try {
-            const response = await fetch(`http://localhost:8081/deleteEmployee/${encodeURIComponent(empIdRaw)}`, {
+            const response = await fetch(`/deleteEmployee/${encodeURIComponent(empIdRaw)}`, {
                 method: "DELETE"
             });
             const message = await response.text();
