@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,8 +15,22 @@ public class LoginController {
     @PostMapping("/login")
     @CrossOrigin(origins = "*")
     public Map<String, Object> login(
-            @RequestParam String username,
-            @RequestParam String password) {
+            @RequestBody(required = false) Map<String, Object> body,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String password) {
+
+        if (username == null && body != null) {
+            Object u = body.get("username");
+            if (u != null) {
+                username = u.toString();
+            }
+        }
+        if (password == null && body != null) {
+            Object p = body.get("password");
+            if (p != null) {
+                password = p.toString();
+            }
+        }
 
         Map<String, Object> response = new HashMap<>();
         if ("we".equals(username) && "we".equals(password)) {

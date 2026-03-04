@@ -10,11 +10,14 @@ if (loginForm) {
             const loginUrl = window.location.origin + '/login';
             console.log('Attempting login POST to:', loginUrl);
 
+            const formBody = new URLSearchParams();
+            formBody.append('username', username);
+            formBody.append('password', password);
+
             const response = await fetch(loginUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-                credentials: 'include'
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formBody.toString()
             });
 
             const contentType = (response.headers.get('content-type') || '').toLowerCase();
