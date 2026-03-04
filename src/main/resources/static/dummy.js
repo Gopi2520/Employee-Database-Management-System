@@ -7,21 +7,65 @@ if (loginForm) {
         const password = document.getElementById("password").value;
 
         try {
-            const response = await fetch("/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+
+            const loginUrl = window.location.origin + '/login';
+            console.log('Attempting login POST to:', loginUrl);
+
+            const response = await fetch(loginUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
             });
 
-            const data = await response.json();
-            if (data.success) {
-                window.location.href = window.location.origin + data.redirect;
+            const contentType = (response.headers.get('content-type') || '').toLowerCase();
+            if (contentType.includes('application/json')) {
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = window.location.origin + data.redirect;
+                } else {
+                    alert('Invalid credentials. Please try again.');
+                    if (data.redirect) window.location.href = window.location.origin + data.redirect;
+                }
             } else {
-                alert("Invalid credentials. Please try again.");
-                window.location.href = window.location.origin + data.redirect;
+                // non-JSON: follow redirect if server redirected, otherwise reload
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    const txt = await response.text();
+                    console.warn('Login response (non-JSON):', txt);
+                    window.location.reload();
+                }
             }
         } catch (error) {
-            console.error("Error:", error);
+            console.error('Error:', error);
+            // Fallback: submit a plain HTML form to perform a full-page POST
+            try {
+                const fallbackForm = document.createElement('form');
+                fallbackForm.method = 'POST';
+                const fallbackAction = window.location.origin + '/login';
+                console.log('Fallback form action set to:', fallbackAction);
+                fallbackForm.action = fallbackAction;
+
+                const uInput = document.createElement('input');
+                uInput.type = 'hidden';
+                uInput.name = 'username';
+                uInput.value = username;
+                fallbackForm.appendChild(uInput);
+
+                const pInput = document.createElement('input');
+                pInput.type = 'hidden';
+                pInput.name = 'password';
+                pInput.value = password;
+                fallbackForm.appendChild(pInput);
+
+                document.body.appendChild(fallbackForm);
+                fallbackForm.submit();
+            } catch (err2) {
+                console.error('Fallback form submit failed:', err2);
+            }
         }
     });
 }
