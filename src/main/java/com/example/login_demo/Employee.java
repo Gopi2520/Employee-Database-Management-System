@@ -1,5 +1,5 @@
 package com.example.login_demo;
-import java.beans.Transient;
+
 import java.time.LocalDateTime;
 import java.util.Base64;
 
@@ -10,27 +10,27 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Transient;
 
 @Entity
 public class Employee {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;        
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    private String fname;    
-    private String lname;    
-    private String contact;  
-    private String mail;     
-    private int age;         
-    private String sex;      
-    private String degree;   
-    private String role;     
-    private double salary;   
+    private String fname;
+    private String lname;
+    private String contact;
+    private String mail;
+    private int age;
+    private String sex;
+    private String degree;
+    private String role;
+    private double salary;
 
     @Lob
-    @jakarta.persistence.Column(columnDefinition = "LONGBLOB")
-    private byte[] img;   
+    private byte[] img;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -64,10 +64,12 @@ public class Employee {
 
     public byte[] getImg() { return img; }
     public void setImg(byte[] img) { this.img = img; }
+
     @Transient
     public String getImgBase64() {
         return img != null ? Base64.getEncoder().encodeToString(img) : null;
     }
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
@@ -80,4 +82,3 @@ public class Employee {
         return createdAt;
     }
 }
-
