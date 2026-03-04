@@ -3,36 +3,28 @@ package com.example.login_demo;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class LoginController {
 
-    @PostMapping(
-            value = "/login",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PostMapping("/login")
     @CrossOrigin(origins = "*")
-    public Map<String, Object> loginJson(@RequestBody User user) {
-        return doLogin(user);
-    }
+    public Map<String, Object> login(
+            @RequestBody(required = false) User user,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String password) {
 
-    @PostMapping(
-            value = "/login",
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    @CrossOrigin(origins = "*")
-    public Map<String, Object> loginForm(User user) {
-        return doLogin(user);
-    }
+        if (user == null) {
+            user = new User();
+            user.setUsername(username);
+            user.setPassword(password);
+        }
 
-    private Map<String, Object> doLogin(User user) {
         Map<String, Object> response = new HashMap<>();
         if ("we".equals(user.getUsername()) && "we".equals(user.getPassword())) {
             response.put("success", true);
