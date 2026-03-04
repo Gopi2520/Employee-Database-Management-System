@@ -10,15 +10,10 @@ if (loginForm) {
             const loginUrl = window.location.origin + '/login';
             console.log('Attempting login POST to:', loginUrl);
 
-            // Send as URL-encoded form data (not JSON, not multipart)
-            const params = new URLSearchParams();
-            params.append('username', username);
-            params.append('password', password);
-
             const response = await fetch(loginUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
                 credentials: 'include'
             });
 
