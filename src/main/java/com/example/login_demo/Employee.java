@@ -9,8 +9,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Transient;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 public class Employee {
@@ -32,6 +33,11 @@ public class Employee {
     @Lob
     private byte[] img;
 
+    @CreationTimestamp
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
+    // --- Getters & Setters ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -70,22 +76,5 @@ public class Employee {
         return img != null ? Base64.getEncoder().encodeToString(img) : null;
     }
 
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false)
-    private LocalDateTime createdAt;
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }
