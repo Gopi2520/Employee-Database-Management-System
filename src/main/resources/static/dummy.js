@@ -30,12 +30,6 @@ if (loginForm) {
         }
     });
 }
-// ===== ESCAPE HELPER =====
-const esc = s => String(s === null || s === undefined ? '' : s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
 // ===== RENDER EMPLOYEE LIST =====
 function renderEmployeeList(container, employees, title, emptyMessage) {
     if (!employees || employees.length === 0) {
