@@ -68,7 +68,7 @@ function renderEmployeeList(container, employees, title, emptyMessage) {
         }
 
         // Format created time if present
-        let createdTime = emp.created ? new Date(emp.created).toLocaleString() : '—';
+        let createdTime = emp.createdAt ? new Date(emp.createdAt).toLocaleString() : '—';
 
         html += `<tr>
     <td>${esc(emp.id)}</td>
@@ -198,13 +198,30 @@ if (viewBtn) {
 }
 // fall back to name-search
 const empName = document.getElementById('empname').value;
-try {
-    const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
-    if (!response.ok) throw new Error('Server error: ' + response.status);
-    const employees = await response.json();
-    renderEmployeeList(detailsDiv, employees, 'Matching Employees', `No employees found with name "${empName}".`);
-} catch (err) {
-    detailsDiv.innerHTML = `<p style="color:red;">Error fetching employees: ${err.message}</p>`;
+const searchBtn = document.getElementById('searchBtn');
+if (searchBtn) {
+    searchBtn.addEventListener('click', async () => {
+        const detailsDiv = document.getElementById('employeeDetails');
+        const empNameElem = document.getElementById('empname');
+        if (!empNameElem) {
+            detailsDiv.innerHTML = `<p style="color:red;">❌ Please enter an employee name.</p>`;
+            return;
+        }
+        const empName = empNameElem.value.trim();
+        if (!empName) {
+            detailsDiv.innerHTML = `<p style="color:red;">❌ Employee name cannot be empty.</p>`;
+            return;
+        }
+
+        try {
+            const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
+            if (!response.ok) throw new Error('Server error: ' + response.status);
+            const employees = await response.json();
+            renderEmployeeList(detailsDiv, employees, 'Matching Employees', `No employees found with name "${empName}".`);
+        } catch (err) {
+            detailsDiv.innerHTML = `<p style="color:red;">❌ Error fetching employees: ${esc(err.message)}</p>`;
+        }
+    });
 }
 
 // ===== VIEW ALL EMPLOYEES =====
