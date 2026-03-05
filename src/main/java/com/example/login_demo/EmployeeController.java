@@ -78,16 +78,14 @@ public class EmployeeController {
         return employeeRepository.findAll();
     }
 
-    @GetMapping("/getEmployeeByName")
-    @ResponseBody
-    public ResponseEntity<Employee> getEmployeeByName(@RequestParam String empname) {
-        List<Employee> employees = employeeRepository.findByFnameIgnoreCase(empname);
-        if (!employees.isEmpty()) {
-            return ResponseEntity.ok(employees.get(0));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-    }
+   @GetMapping("/getEmployeeByName")
+@ResponseBody
+public ResponseEntity<List<Employee>> getEmployeeByName(@RequestParam String empname) {
+    List<Employee> employees = employeeRepository.findByFnameContainingIgnoreCase(empname);
+    return employees.isEmpty()
+            ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
+            : ResponseEntity.ok(employees);
+}
 
     @GetMapping("/getEmployeeById/{id}")
     @ResponseBody
