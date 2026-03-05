@@ -81,4 +81,11 @@ public class Employee {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+    @CreationTimestamp
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
 }

@@ -90,48 +90,79 @@ function renderEmployeeList(container, employees, title, emptyMessage) {
 }
 
 // ===== VIEW OR FETCH EMPLOYEE =====
+// Escape helper to prevent HTML injection
+function esc(str) {
+    return str ? String(str).replace(/[&<>"']/g, s => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+    }[s])) : "";
+}
+
 const viewBtn = document.getElementById('viewBtn');
 if (viewBtn) {
     viewBtn.addEventListener('click', async () => {
         const detailsDiv = document.getElementById('employeeDetails');
         if (!detailsDiv) return;
-
-        // prefer ID if it exists in the DOM
         const empIdElem = document.getElementById('empId');
-        if (empIdElem) {
-            const id = empIdElem.value.trim();
-            if (!id) {
-                detailsDiv.innerHTML = `<p>Please enter an employee ID.</p>`;
-                return;
-            }
-            try {
-                const response = await fetch(`/getEmployeeById/${encodeURIComponent(id)}`);
-                if (!response.ok) throw new Error('Employee not found');
-                const emp = await response.json();
+        if (!empIdElem) {
+            detailsDiv.innerHTML = `<p style="color:red;">❌ Please enter an employee ID.</p>`;
+            return;
+        }
+        const id = empIdElem.value.trim();
+        if (!id) {
+            detailsDiv.innerHTML = `<p style="color:red;">❌ Employee ID cannot be empty.</p>`;
+            return;
+        }
 
-                detailsDiv.innerHTML = `
-        <h2>Update Employee</h2>
-        <form id="updateForm">
-        <input type="hidden" id="empId" value="${emp.id}">
-        <label>First Name:</label><input type="text" id="fname" value="${esc(emp.fname)}" required><br>
-        <label>Last Name:</label><input type="text" id="lname" value="${esc(emp.lname || '')}"><br>
-        <label>Contact:</label><input type="text" id="contact" value="${esc(emp.contact)}"><br>
-        <label>Email:</label><input type="email" id="mail" value="${esc(emp.mail)}"><br>
-        <label>Age:</label><input type="number" id="age" value="${esc(emp.age)}"><br>
-        <label>Sex:</label><input type="text" id="sex" value="${esc(emp.sex)}"><br>
-        <label>Degree:</label><input type="text" id="degree" value="${esc(emp.degree)}"><br>
-        <label>Role:</label><input type="text" id="role" value="${esc(emp.role)}"><br>
-        <label>Salary:</label><input type="number" id="salary" value="${esc(emp.salary)}"><br>
-        <label>Photo:</label><input type="file" id="img" accept="image/*"><br>
-        <button type="submit">Save Changes</button>
-        </form>`;
+        try {
+            const response = await fetch(`/getEmployeeById/${encodeURIComponent(id)}`);
+            if (!response.ok) throw new Error(`Server returned ${response.status}`);
 
-                const updateForm = document.getElementById('updateForm');
-                updateForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const id2 = document.getElementById('empId').value;
+            const emp = await response.json();
 
-                    const updatedEmployee = {
+            detailsDiv.innerHTML = `
+                <h2>Update Employee</h2>
+                <form id="updateForm">
+                    <input type="hidden" id="empId" value="${emp.id}">
+                    <label>First Name:</label><input type="text" id="fname" value="${esc(emp.fname)}" required><br>
+                    <label>Last Name:</label><input type="text" id="lname" value="${esc(emp.lname || '')}"><br>
+                    <label>Contact:</label><input type="text" id="contact" value="${esc(emp.contact)}"><br>
+                    <label>Email:</label><input type="email" id="mail" value="${esc(emp.mail)}"><br>
+                    <label>Age:</label><input type="number" id="age" value="${esc(emp.age)}"><br>
+                    <label>Sex:</label><input type="text" id="sex" value="${esc(emp.sex)}"><br>
+                    <label>Degree:</label><input type="text" id="degree" value="${esc(emp.degree)}"><br>
+                    <label>Role:</label><input type="text" id="role" value="${esc(emp.role)}"><br>
+                    <label>Salary:</label><input type="number" id="salary" value="${esc(emp.salary)}"><br>
+                    <label>Photo:</label><input type="file" id="img" accept="image/*"><br>
+                    <button type="submit">Save Changes</button>
+                </form>
+            `;
+
+            const updateForm = document.getElementById('updateForm');
+            updateForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id2 = document.getElementById('empId').value;
+
+                const fileInput = document.getElementById('img');
+                const file = fileInput.files[0];
+
+                let body;
+                let headers;
+
+                if (file) {
+                    body = new FormData();
+                    body.append("fname", document.getElementById('fname').value);
+                    body.append("lname", document.getElementById('lname').value);
+                    body.append("contact", document.getElementById('contact').value);
+                    body.append("mail", document.getElementById('mail').value);
+                    body.append("age", document.getElementById('age').value);
+                    body.append("sex", document.getElementById('sex').value);
+                    body.append("degree", document.getElementById('degree').value);
+                    body.append("role", document.getElementById('role').value);
+                    body.append("salary", document.getElementById('salary').value);
+                    body.append("img", file);
+                    headers = {};
+                } else {
+                    body = JSON.stringify({
                         id: id2,
                         fname: document.getElementById('fname').value,
                         lname: document.getElementById('lname').value,
@@ -142,39 +173,38 @@ if (viewBtn) {
                         degree: document.getElementById('degree').value,
                         role: document.getElementById('role').value,
                         salary: document.getElementById('salary').value
-                    };
-
-                    const updateResponse = await fetch(`/updateEmployee/${id2}`, {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(updatedEmployee)
                     });
+                    headers = { "Content-Type": "application/json" };
+                }
 
-                    const message = await updateResponse.text();
-                    if (updateResponse.ok) {
-                        window.location.href = "success.html";
-                    } else {
-                        detailsDiv.innerHTML = `<p style="color:red;">❌ ${message}</p>`;
-                    }
+                const updateResponse = await fetch(`/updateEmployee/${id2}`, {
+                    method: "PUT",
+                    headers,
+                    body
                 });
 
-            } catch (err) {
-                detailsDiv.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
-            }
-            return;
-        }
+                const message = await updateResponse.text();
+                if (updateResponse.ok) {
+                    window.location.href = "success.html";
+                } else {
+                    detailsDiv.innerHTML = `<p style="color:red;">❌ ${message}</p>`;
+                }
+            });
 
-        // fall back to name-search
-        const empName = document.getElementById('empname').value;
-        try {
-            const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
-            if (!response.ok) throw new Error('Server error: ' + response.status);
-            const employees = await response.json();
-            renderEmployeeList(detailsDiv, employees, 'Matching Employees', `No employees found with name "${empName}".`);
         } catch (err) {
-            detailsDiv.innerHTML = `<p style="color:red;">Error fetching employees: ${err.message}</p>`;
+            detailsDiv.innerHTML = `<p style="color:red;">❌ Error: ${esc(err.message)}</p>`;
         }
     });
+}
+// fall back to name-search
+const empName = document.getElementById('empname').value;
+try {
+    const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
+    if (!response.ok) throw new Error('Server error: ' + response.status);
+    const employees = await response.json();
+    renderEmployeeList(detailsDiv, employees, 'Matching Employees', `No employees found with name "${empName}".`);
+} catch (err) {
+    detailsDiv.innerHTML = `<p style="color:red;">Error fetching employees: ${err.message}</p>`;
 }
 
 // ===== VIEW ALL EMPLOYEES =====
