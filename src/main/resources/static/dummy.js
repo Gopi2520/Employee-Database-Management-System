@@ -1,5 +1,5 @@
 // ===== LOGIN HANDLER =====
-const loginForm = document.getElementById("loginform"); // ✅ matches HTML
+const loginForm = document.getElementById("loginform");
 if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -7,17 +7,13 @@ if (loginForm) {
         const password = document.getElementById("password").value;
 
         try {
-            const loginUrl = window.location.origin + "/login"; // ✅ correct endpoint
+            const loginUrl = window.location.origin + "/login";
             console.log("Attempting login POST to:", loginUrl);
-
-            const formBody = new URLSearchParams();
-            formBody.append("username", username);
-            formBody.append("password", password);
 
             const response = await fetch(loginUrl, {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: formBody
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
             });
 
             const data = await response.json();
@@ -31,34 +27,9 @@ if (loginForm) {
             }
         } catch (error) {
             console.error("Error:", error);
-
-            // ===== Fallback: plain HTML form submit =====
-            try {
-                const fallbackForm = document.createElement("form");
-                fallbackForm.method = "POST";
-                fallbackForm.action = window.location.origin + "/login";
-
-                const uInput = document.createElement("input");
-                uInput.type = "hidden";
-                uInput.name = "username";
-                uInput.value = username;
-                fallbackForm.appendChild(uInput);
-
-                const pInput = document.createElement("input");
-                pInput.type = "hidden";
-                pInput.name = "password";
-                pInput.value = password;
-                fallbackForm.appendChild(pInput);
-
-                document.body.appendChild(fallbackForm);
-                fallbackForm.submit();
-            } catch (err2) {
-                console.error("Fallback form submit failed:", err2);
-            }
         }
     });
 }
-
 // ===== ESCAPE HELPER =====
 const esc = s => String(s === null || s === undefined ? '' : s)
     .replace(/&/g, '&amp;')
