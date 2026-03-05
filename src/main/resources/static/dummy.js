@@ -1,5 +1,5 @@
 // ===== LOGIN HANDLER =====
-const loginForm = document.getElementById("loginform");
+const loginForm = document.getElementById("loginform"); // ✅ matches HTML
 if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -7,64 +7,53 @@ if (loginForm) {
         const password = document.getElementById("password").value;
 
         try {
-            const loginUrl = window.location.origin + '/login';
-            console.log('Attempting login POST to:', loginUrl);
+            const loginUrl = window.location.origin + "/login"; // ✅ correct endpoint
+            console.log("Attempting login POST to:", loginUrl);
 
             const formBody = new URLSearchParams();
-            formBody.append('username', username);
-            formBody.append('password', password);
+            formBody.append("username", username);
+            formBody.append("password", password);
 
             const response = await fetch(loginUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formBody.toString()
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: formBody
             });
 
-            const contentType = (response.headers.get('content-type') || '').toLowerCase();
-            if (contentType.includes('application/json')) {
-                const data = await response.json();
-                if (data.success) {
-                    window.location.href = window.location.origin + data.redirect;
-                } else {
-                    alert('Invalid credentials. Please try again.');
-                    if (data.redirect) window.location.href = window.location.origin + data.redirect;
-                }
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = window.location.origin + data.redirect;
             } else {
-                // non-JSON: follow redirect if server redirected, otherwise reload
-                if (response.redirected) {
-                    window.location.href = response.url;
-                } else {
-                    const txt = await response.text();
-                    console.warn('Login response (non-JSON):', txt);
-                    window.location.reload();
+                alert("Invalid credentials. Please try again.");
+                if (data.redirect) {
+                    window.location.href = window.location.origin + data.redirect;
                 }
             }
         } catch (error) {
-            console.error('Error:', error);
-            // Fallback: submit a plain HTML form to perform a full-page POST
-            try {
-                const fallbackForm = document.createElement('form');
-                fallbackForm.method = 'POST';
-                const fallbackAction = window.location.origin + '/login';
-                console.log('Fallback form action set to:', fallbackAction);
-                fallbackForm.action = fallbackAction;
+            console.error("Error:", error);
 
-                const uInput = document.createElement('input');
-                uInput.type = 'hidden';
-                uInput.name = 'username';
+            // ===== Fallback: plain HTML form submit =====
+            try {
+                const fallbackForm = document.createElement("form");
+                fallbackForm.method = "POST";
+                fallbackForm.action = window.location.origin + "/login";
+
+                const uInput = document.createElement("input");
+                uInput.type = "hidden";
+                uInput.name = "username";
                 uInput.value = username;
                 fallbackForm.appendChild(uInput);
 
-                const pInput = document.createElement('input');
-                pInput.type = 'hidden';
-                pInput.name = 'password';
+                const pInput = document.createElement("input");
+                pInput.type = "hidden";
+                pInput.name = "password";
                 pInput.value = password;
                 fallbackForm.appendChild(pInput);
 
                 document.body.appendChild(fallbackForm);
                 fallbackForm.submit();
             } catch (err2) {
-                console.error('Fallback form submit failed:', err2);
+                console.error("Fallback form submit failed:", err2);
             }
         }
     });
