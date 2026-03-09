@@ -10,11 +10,14 @@ if (loginForm) {
             const loginUrl = window.location.origin + '/login';
             console.log('Attempting login POST to:', loginUrl);
 
+            const formBody = new URLSearchParams();
+            formBody.append('username', username);
+            formBody.append('password', password);
+
             const response = await fetch(loginUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-                credentials: 'include'
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formBody.toString()
             });
 
             const contentType = (response.headers.get('content-type') || '').toLowerCase();
@@ -235,28 +238,47 @@ if (viewAllBtn) {
 const delBtn = document.getElementById("delBtn");
 if (delBtn) {
     delBtn.addEventListener("click", async () => {
+        console.log("Delete button clicked");
         const deleteResult = document.getElementById("deleteResult");
         const empIdElem = document.getElementById("empId");
         const empIdRaw = empIdElem && empIdElem.value.trim();
 
         if (!empIdRaw) {
-            deleteResult.innerHTML = `<p style="color:red;">Please enter an employee ID to delete.</p>`;
+            if (deleteResult) {
+                deleteResult.innerHTML = `<p style="color:red;">Please enter an employee ID to delete.</p>`;
+            }
             return;
         }
 
         try {
-            const response = await fetch(`/deleteEmployee/${encodeURIComponent(empIdRaw)}`, {
-                method: "DELETE"
-            });
+            if (deleteResult) {
+                deleteResult.innerHTML = `<p>Deleting employee ${esc(empIdRaw)}...</p>`;
+            }
+
+            const url = `/deleteEmployee/${encodeURIComponent(empIdRaw)}`;
+            console.log("Attempting delete:", url);
+
+            let response = await fetch(url, { method: "DELETE" });
+            // Some environments block DELETE; fallback to POST
+            if (!response.ok && (response.status === 405 || response.status === 415 || response.status === 403)) {
+                console.warn("DELETE failed, retrying with POST. Status:", response.status);
+                response = await fetch(url, { method: "POST" });
+            }
             const message = await response.text();
 
             if (response.ok) {
-                deleteResult.innerHTML = `<p style="color:green;">✅ ${message}</p>`;
+                if (deleteResult) {
+                    deleteResult.innerHTML = `<p style="color:green;">✅ ${message}</p>`;
+                }
             } else {
-                deleteResult.innerHTML = `<p style="color:red;">❌ ${message}</p>`;
+                if (deleteResult) {
+                    deleteResult.innerHTML = `<p style="color:red;">❌ ${message || ('Request failed with status ' + response.status)}</p>`;
+                }
             }
         } catch (error) {
-            deleteResult.innerHTML = `<p style="color:red;">Error deleting employee: ${error.message}</p>`;
+            if (deleteResult) {
+                deleteResult.innerHTML = `<p style="color:red;">Error deleting employee: ${error.message}</p>`;
+            }
         }
     });
 }
