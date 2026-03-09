@@ -213,7 +213,7 @@ if (updateBtn) {
             if (response.ok) {
                 updateResult.innerHTML = `<p style="color:green;">✅ ${message}</p>`;
             } else {
-                updateResult.innerHTML = `<p style="color:red;">❌ ${message}</p>`;
+                updateResult.innerHTML = `<p style="color:red;">${message}</p>`;
             }
         } catch (error) {
             updateResult.innerHTML = `<p style="color:red;">Error updating employee: ${error.message}</p>`;
