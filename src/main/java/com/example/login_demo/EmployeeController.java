@@ -58,6 +58,20 @@ public class EmployeeController {
     @DeleteMapping("/deleteEmployee/{id}")
     @ResponseBody
     public ResponseEntity<String> deleteEmployee(@PathVariable int id) {
+        return deleteEmployeeInternal(id);
+    }
+
+    /**
+     * Some hosting/proxy setups or browser contexts can block DELETE requests.
+     * This POST fallback allows the UI to delete reliably.
+     */
+    @PostMapping("/deleteEmployee/{id}")
+    @ResponseBody
+    public ResponseEntity<String> deleteEmployeePost(@PathVariable int id) {
+        return deleteEmployeeInternal(id);
+    }
+
+    private ResponseEntity<String> deleteEmployeeInternal(int id) {
         if (employeeRepository.existsById(id)) {
             employeeRepository.deleteById(id);
             return new ResponseEntity<>("Employee with ID " + id + " deleted successfully", HttpStatus.OK);

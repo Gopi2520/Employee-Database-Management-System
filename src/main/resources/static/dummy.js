@@ -113,7 +113,7 @@ if (viewBtn) {
             // Normalize to lowercase for case-insensitive search
             name = name.toLowerCase();
 
-            const response = await fetch(`/viewEmployeesByName/${encodeURIComponent(name)}`);
+            const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(name)}`);
             if (!response.ok) throw new Error(`Server returned ${response.status}`);
 
             const employees = await response.json();
@@ -174,6 +174,52 @@ if (viewAllBtn) {
         }
     });
 }
+// ===== UPDATE EMPLOYEE =====
+const updateBtn = document.getElementById("updateBtn");
+if (updateBtn) {
+    updateBtn.addEventListener("click", async () => {
+        const updateResult = document.getElementById("updateResult");
+        const empIdElem = document.getElementById("empId");
+        const empIdRaw = empIdElem && empIdElem.value.trim();
+
+        if (!empIdRaw) {
+            updateResult.innerHTML = `<p style="color:red;">❌ Please enter an employee ID.</p>`;
+            return;
+        }
+
+        // Collect updated fields from your form
+        const fname = document.getElementById("fname").value.trim();
+        const lname = document.getElementById("lname").value.trim();
+        const contact = document.getElementById("contact").value.trim();
+        const mail = document.getElementById("mail").value.trim();
+        const age = parseInt(document.getElementById("age").value, 10);
+        const sex = document.getElementById("sex").value.trim();
+        const degree = document.getElementById("degree").value.trim();
+        const role = document.getElementById("role").value.trim();
+        const salary = parseFloat(document.getElementById("salary").value);
+
+        const updatedEmployee = {
+            fname, lname, contact, mail, age, sex, degree, role, salary
+        };
+
+        try {
+            const response = await fetch(`/updateEmployee/${encodeURIComponent(empIdRaw)}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedEmployee)
+            });
+
+            const message = await response.text();
+            if (response.ok) {
+                updateResult.innerHTML = `<p style="color:green;">✅ ${message}</p>`;
+            } else {
+                updateResult.innerHTML = `<p style="color:red;">❌ ${message}</p>`;
+            }
+        } catch (error) {
+            updateResult.innerHTML = `<p style="color:red;">Error updating employee: ${error.message}</p>`;
+        }
+    });
+}
 
 // ===== DELETE EMPLOYEE BY ID =====
 const delBtn = document.getElementById("delBtn");
@@ -184,23 +230,41 @@ if (delBtn) {
         const empIdRaw = empIdElem && empIdElem.value.trim();
 
         if (!empIdRaw) {
-            deleteResult.innerHTML = `<p style="color:red;">Please enter an employee ID to delete.</p>`;
+            if (deleteResult) {
+                deleteResult.innerHTML = `<p style="color:red;">Please enter an employee ID to delete.</p>`;
+            }
             return;
         }
 
         try {
-            const response = await fetch(`/deleteEmployee/${encodeURIComponent(empIdRaw)}`, {
-                method: "DELETE"
-            });
+            if (deleteResult) {
+                deleteResult.innerHTML = `<p>Deleting employee ${esc(empIdRaw)}...</p>`;
+            }
+
+            const url = `/deleteEmployee/${encodeURIComponent(empIdRaw)}`;
+            console.log("Attempting delete:", url);
+
+            let response = await fetch(url, { method: "DELETE" });
+            // Fallback for environments that block DELETE
+            if (!response.ok && (response.status === 405 || response.status === 415 || response.status === 403)) {
+                console.warn("DELETE failed, retrying with POST. Status:", response.status);
+                response = await fetch(url, { method: "POST" });
+            }
             const message = await response.text();
 
             if (response.ok) {
-                deleteResult.innerHTML = `<p style="color:green;">✅ ${message}</p>`;
+                if (deleteResult) {
+                    deleteResult.innerHTML = `<p style="color:green;">✅ ${message}</p>`;
+                }
             } else {
-                deleteResult.innerHTML = `<p style="color:red;">❌ ${message}</p>`;
+                if (deleteResult) {
+                    deleteResult.innerHTML = `<p style="color:red;">❌ ${message || ('Request failed with status ' + response.status)}</p>`;
+                }
             }
         } catch (error) {
-            deleteResult.innerHTML = `<p style="color:red;">Error deleting employee: ${error.message}</p>`;
+            if (deleteResult) {
+                deleteResult.innerHTML = `<p style="color:red;">Error deleting employee: ${error.message}</p>`;
+            }
         }
     });
 }
