@@ -1,5 +1,5 @@
 package com.example.login_demo;
-
+import java.beans.Transient;
 import java.time.LocalDateTime;
 import java.util.Base64;
 
@@ -9,35 +9,29 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
-import jakarta.persistence.Transient;
-
-import org.hibernate.annotations.CreationTimestamp;
+import jakarta.persistence.PrePersist;
 
 @Entity
 public class Employee {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;        
 
-    private String fname;
-    private String lname;
-    private String contact;
-    private String mail;
-    private int age;
-    private String sex;
-    private String degree;
-    private String role;
-    private double salary;
+    private String fname;    
+    private String lname;    
+    private String contact;  
+    private String mail;     
+    private int age;         
+    private String sex;      
+    private String degree;   
+    private String role;     
+    private double salary;   
 
     @Lob
-    private byte[] img;
+    @jakarta.persistence.Column(columnDefinition = "LONGBLOB")
+    private byte[] img;   
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false)
-    private LocalDateTime createdAt;
-
-    // --- Getters & Setters ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -70,11 +64,20 @@ public class Employee {
 
     public byte[] getImg() { return img; }
     public void setImg(byte[] img) { this.img = img; }
-
     @Transient
     public String getImgBase64() {
         return img != null ? Base64.getEncoder().encodeToString(img) : null;
     }
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }
+
