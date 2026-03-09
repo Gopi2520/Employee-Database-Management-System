@@ -228,12 +228,11 @@ if (delBtn) {
         const deleteResult = document.getElementById("deleteResult");
         const empIdElem = document.getElementById("empId");
         const empIdRaw = empIdElem && empIdElem.value.trim();
-
+        console.log("Attempting to delete employee with ID:", empIdRaw);
         if (!empIdRaw) {
             deleteResult.innerHTML = `<p style="color:red;">Please enter an employee ID to delete.</p>`;
             return;
         }
-
         try {
             const response = await fetch(`/deleteEmployee/${encodeURIComponent(empIdRaw)}`, {
                 method: "DELETE"

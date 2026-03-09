@@ -11,5 +11,8 @@ import org.springframework.stereotype.Service;
 
 	    public List<Employee> findByFirstName(String fname) {
 	        return repo.findByFnameIgnoreCase(fname);
-	}	
+	}
+	    public List<Employee> searchByFirstName(String fname) {
+	        return repo.findByFnameContainingIgnoreCase(fname);
+	    }
 }
