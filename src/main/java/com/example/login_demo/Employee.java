@@ -31,8 +31,9 @@ public class Employee {
     private double salary;
 
     @Lob
+    @JsonIgnore
     private byte[] img;
-
+    
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;

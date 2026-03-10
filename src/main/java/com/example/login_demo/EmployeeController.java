@@ -73,10 +73,10 @@ public class EmployeeController {
     @GetMapping("/viewEmployeesByName")
     @ResponseBody
     public ResponseEntity<List<Employee>> getEmployeesByName(@RequestParam String empname) {
-        List<Employee> employees = employeeService.findByFnameContainingIgnoreCase(empname);
-        return employees.isEmpty()
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
-                : ResponseEntity.ok(employees);
+    List<Employee> employees = employeeService.searchByFirstName(empname);
+    return employees.isEmpty()
+            ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
+            : ResponseEntity.ok(employees);
     }
 
     // --- View all ---
