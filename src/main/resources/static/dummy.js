@@ -132,7 +132,6 @@ if (viewBtn) {
     });
 }
 // fall back to name-search
-const empName = document.getElementById('empname').value;
 const searchBtn = document.getElementById('searchBtn');
 if (searchBtn) {
     searchBtn.addEventListener('click', async () => {
