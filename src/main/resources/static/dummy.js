@@ -174,6 +174,7 @@ if (viewAllBtn) {
     });
 }
 // ===== UPDATE EMPLOYEE =====
+// ===== UPDATE EMPLOYEE =====
 const updateBtn = document.getElementById("updateBtn");
 
 if (updateBtn) {
@@ -188,15 +189,15 @@ if (updateBtn) {
         }
 
         // Collect form values safely
-        const fnameElem = document.getElementById("fname");
-        const lnameElem = document.getElementById("lname");
+        const fnameElem   = document.getElementById("fname");
+        const lnameElem   = document.getElementById("lname");
         const contactElem = document.getElementById("contact");
-        const mailElem = document.getElementById("mail");
-        const ageElem = document.getElementById("age");
-        const sexElem = document.getElementById("sex");
-        const degreeElem = document.getElementById("degree");
-        const roleElem = document.getElementById("role");
-        const salaryElem = document.getElementById("salary");
+        const mailElem    = document.getElementById("mail");
+        const ageElem     = document.getElementById("age");
+        const sexElem     = document.getElementById("sex");
+        const degreeElem  = document.getElementById("degree");
+        const roleElem    = document.getElementById("role");
+        const salaryElem  = document.getElementById("salary");
 
         // Guard against missing fields
         if (!fnameElem || !lnameElem || !contactElem || !mailElem || !ageElem ||
@@ -206,15 +207,15 @@ if (updateBtn) {
         }
 
         const updatedEmployee = {
-            fname: fnameElem.value.trim(),
-            lname: lnameElem.value.trim(),
+            fname:   fnameElem.value.trim(),
+            lname:   lnameElem.value.trim(),
             contact: contactElem.value.trim(),
-            mail: mailElem.value.trim(),
-            age: parseInt(ageElem.value, 10),
-            sex: sexElem.value.trim(),
-            degree: degreeElem.value.trim(),
-            role: roleElem.value.trim(),
-            salary: parseFloat(salaryElem.value)
+            mail:    mailElem.value.trim(),
+            age:     parseInt(ageElem.value, 10),
+            sex:     sexElem.value.trim(),
+            degree:  degreeElem.value.trim(),
+            role:    roleElem.value.trim(),
+            salary:  parseFloat(salaryElem.value)
         };
 
         try {
@@ -234,7 +235,8 @@ if (updateBtn) {
             employeeDetails.innerHTML = `<p style="color:red;">Error updating employee: ${error.message}</p>`;
         }
     });
-}// ===== DELETE EMPLOYEE BY ID =====
+}
+// ===== DELETE EMPLOYEE BY ID =====
 
 const delBtn = document.getElementById("delBtn");
 if (delBtn) {

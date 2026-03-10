@@ -19,6 +19,7 @@ public class EmployeeController {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+    private EmployeeService employeeService;
 
     @PostMapping("/uploadEmployee")
     public String uploadEmployee(
@@ -67,9 +68,9 @@ public class EmployeeController {
     @GetMapping("/viewEmployeesByName")
     @ResponseBody
     public List<Employee> getEmployeesByName(@RequestParam String empname) {
-        return employeeRepository.findByFnameIgnoreCase(empname);
+        return employeeService.findByFnameContainingIgnoreCase(empname);
     }
-
+    
     @GetMapping("/viewAllEmployees")
     @ResponseBody
     public List<Employee> viewAllEmployees() {
