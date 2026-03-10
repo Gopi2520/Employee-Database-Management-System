@@ -178,12 +178,12 @@ const updateBtn = document.getElementById("updateBtn");
 
 if (updateBtn) {
     updateBtn.addEventListener("click", async () => {
-        const updateResult = document.getElementById("updateResult");
+        const employeeDetails = document.getElementById("employeeDetails");
         const empIdElem = document.getElementById("empId");
         const empIdRaw = empIdElem && empIdElem.value.trim();
 
         if (!empIdRaw) {
-            updateResult.innerHTML = `<p style="color:red;">❌ Please enter an employee ID.</p>`;
+            employeeDetails.innerHTML = `<p style="color:red;">❌ Please enter an employee ID.</p>`;
             return;
         }
 
@@ -201,7 +201,7 @@ if (updateBtn) {
         // Guard against missing fields
         if (!fnameElem || !lnameElem || !contactElem || !mailElem || !ageElem ||
             !sexElem || !degreeElem || !roleElem || !salaryElem) {
-            updateResult.innerHTML = `<p style="color:red;">❌ Missing one or more form fields in HTML.</p>`;
+            employeeDetails.innerHTML = `<p style="color:red;">❌ Missing one or more form fields in HTML.</p>`;
             return;
         }
 
@@ -226,12 +226,12 @@ if (updateBtn) {
 
             const message = await response.text();
             if (response.ok) {
-                updateResult.innerHTML = `<p style="color:green;">✅ ${message}</p>`;
+                employeeDetails.innerHTML = `<p style="color:green;">✅ ${message}</p>`;
             } else {
-                updateResult.innerHTML = `<p style="color:red;">${message}</p>`;
+                employeeDetails.innerHTML = `<p style="color:red;">${message}</p>`;
             }
         } catch (error) {
-            updateResult.innerHTML = `<p style="color:red;">Error updating employee: ${error.message}</p>`;
+            employeeDetails.innerHTML = `<p style="color:red;">Error updating employee: ${error.message}</p>`;
         }
     });
 }// ===== DELETE EMPLOYEE BY ID =====
