@@ -1,26 +1,24 @@
 package com.example.login_demo;
+
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 @Controller
 public class EmployeeController {
 
     @Autowired
     private EmployeeRepository employeeRepository;
-    private EmployeeService employeeService;
 
+    @Autowired
+    private EmployeeService employeeService;  // FIX: inject service properly
+
+    // --- Create ---
     @PostMapping("/uploadEmployee")
     public String uploadEmployee(
             @RequestParam("fname") String fname,
@@ -33,6 +31,7 @@ public class EmployeeController {
             @RequestParam("role") String role,
             @RequestParam("salary") double salary,
             @RequestParam("img") MultipartFile img) throws Exception {
+
         Employee emp = new Employee();
         emp.setFname(fname);
         emp.setLname(lname);
@@ -44,48 +43,50 @@ public class EmployeeController {
         emp.setRole(role);
         emp.setSalary(salary);
         emp.setImg(img.getBytes());
+
         employeeRepository.save(emp);
         return "redirect:/success.html";
     }
 
+    // --- Read by ID (for Thymeleaf view) ---
     @GetMapping("/employee/{id}")
     public String getEmployee(@PathVariable int id, Model model) {
         Employee emp = employeeRepository.findById(id).orElseThrow();
         model.addAttribute("employee", emp);
         return "employeeView";
     }
+
+    // --- Delete ---
     @DeleteMapping("/deleteEmployee/{id}")
     @ResponseBody
     public ResponseEntity<String> deleteEmployee(@PathVariable int id) {
         if (employeeRepository.existsById(id)) {
             employeeRepository.deleteById(id);
-            return new ResponseEntity<>("Employee with ID " + id + " deleted successfully", HttpStatus.OK);
+            return ResponseEntity.ok("Employee with ID " + id + " deleted successfully");
         } else {
-            return new ResponseEntity<>("Employee with ID " + id + " not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("Employee with ID " + id + " not found");
         }
     }
 
+    // --- Search by name (partial match) ---
     @GetMapping("/viewEmployeesByName")
     @ResponseBody
-    public List<Employee> getEmployeesByName(@RequestParam String empname) {
-        return employeeService.findByFnameContainingIgnoreCase(empname);
+    public ResponseEntity<List<Employee>> getEmployeesByName(@RequestParam String empname) {
+        List<Employee> employees = employeeService.findByFnameContainingIgnoreCase(empname);
+        return employees.isEmpty()
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
+                : ResponseEntity.ok(employees);
     }
-    
+
+    // --- View all ---
     @GetMapping("/viewAllEmployees")
     @ResponseBody
     public List<Employee> viewAllEmployees() {
         return employeeRepository.findAll();
     }
 
-   @GetMapping("/getEmployeeByName")
-@ResponseBody
-public ResponseEntity<List<Employee>> getEmployeeByName(@RequestParam String empname) {
-    List<Employee> employees = employeeRepository.findByFnameContainingIgnoreCase(empname);
-    return employees.isEmpty()
-            ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
-            : ResponseEntity.ok(employees);
-}
-
+    // --- Get by ID (JSON) ---
     @GetMapping("/getEmployeeById/{id}")
     @ResponseBody
     public ResponseEntity<Employee> getEmployeeById(@PathVariable int id) {
@@ -94,9 +95,11 @@ public ResponseEntity<List<Employee>> getEmployeeByName(@RequestParam String emp
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 
+    // --- Update ---
     @PutMapping("/updateEmployee/{id}")
     @ResponseBody
-    public ResponseEntity<String> updateEmployee(@PathVariable int id, @RequestBody Employee updatedEmployee) {
+    public ResponseEntity<String> updateEmployee(@PathVariable int id,
+                                                 @RequestBody Employee updatedEmployee) {
         return employeeRepository.findById(id)
                 .map(emp -> {
                     emp.setFname(updatedEmployee.getFname());
