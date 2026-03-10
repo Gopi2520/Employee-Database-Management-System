@@ -173,69 +173,81 @@ if (viewAllBtn) {
         }
     });
 }
-// ===== UPDATE EMPLOYEE =====
-// ===== UPDATE EMPLOYEE =====
-const updateBtn = document.getElementById("updateBtn");
+document.getElementById("loadBtn").addEventListener("click", async () => {
+    const empId = document.getElementById("empId").value.trim();
+    const container = document.getElementById("UPemployeeDetails");
+    if (!empId) {
+        container.innerHTML = `<p style="color:red;">❌ Please enter an employee ID.</p>`;
+        return;
+    }
+    try {
+        const response = await fetch(`/getEmployeeById/${encodeURIComponent(empId)}`);
+        if (response.ok) {
+            const emp = await response.json();
+            // Inject the update form dynamically
+            container.innerHTML = `
+                <form id="employeeForm">
+                    <label>First Name:</label>
+                    <input type="text" id="fname" name="fname" value="${emp.fname || ''}" required><br><br>
 
-if (updateBtn) {
-    updateBtn.addEventListener("click", async () => {
-        const employeeDetails = document.getElementById("employeeDetails");
-        const empIdElem = document.getElementById("empId");
-        const empIdRaw = empIdElem && empIdElem.value.trim();
+                    <label>Last Name:</label>
+                    <input type="text" id="lname" name="lname" value="${emp.lname || ''}" required><br><br>
 
-        if (!empIdRaw) {
-            employeeDetails.innerHTML = `<p style="color:red;">❌ Please enter an employee ID.</p>`;
-            return;
-        }
+                    <label>Contact:</label>
+                    <input type="text" id="contact" name="contact" value="${emp.contact || ''}" required><br><br>
 
-        // Collect form values safely
-        const fnameElem   = document.getElementById("fname");
-        const lnameElem   = document.getElementById("lname");
-        const contactElem = document.getElementById("contact");
-        const mailElem    = document.getElementById("mail");
-        const ageElem     = document.getElementById("age");
-        const sexElem     = document.getElementById("sex");
-        const degreeElem  = document.getElementById("degree");
-        const roleElem    = document.getElementById("role");
-        const salaryElem  = document.getElementById("salary");
+                    <label>Email:</label>
+                    <input type="email" id="mail" name="mail" value="${emp.mail || ''}" required><br><br>
 
-        // Guard against missing fields
-        if (!fnameElem || !lnameElem || !contactElem || !mailElem || !ageElem ||
-            !sexElem || !degreeElem || !roleElem || !salaryElem) {
-            employeeDetails.innerHTML = `<p style="color:red;">❌ Missing one or more form fields in HTML.</p>`;
-            return;
-        }
+                    <label>Age:</label>
+                    <input type="number" id="age" name="age" value="${emp.age || ''}" required><br><br>
 
-        const updatedEmployee = {
-            fname:   fnameElem.value.trim(),
-            lname:   lnameElem.value.trim(),
-            contact: contactElem.value.trim(),
-            mail:    mailElem.value.trim(),
-            age:     parseInt(ageElem.value, 10),
-            sex:     sexElem.value.trim(),
-            degree:  degreeElem.value.trim(),
-            role:    roleElem.value.trim(),
-            salary:  parseFloat(salaryElem.value)
-        };
+                    <label>Sex:</label>
+                    <input type="text" id="sex" name="sex" value="${emp.sex || ''}" required><br><br>
 
-        try {
-            const response = await fetch(`/updateEmployee/${encodeURIComponent(empIdRaw)}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedEmployee)
+                    <label>Degree:</label>
+                    <input type="text" id="degree" name="degree" value="${emp.degree || ''}" required><br><br>
+
+                    <label>Role:</label>
+                    <input type="text" id="role" name="role" value="${emp.role || ''}" required><br><br>
+
+                    <label>Salary:</label>
+                    <input type="number" id="salary" name="salary" step="0.01" value="${emp.salary || ''}" required><br><br>
+
+                    <label>Image:</label>
+                    <input type="file" id="img" name="img" accept="image/*"><br>
+                    ${emp.imgBase64 ? `<img src="data:image/png;base64,${emp.imgBase64}" style="max-width:150px;" alt="Current Image">` : ''}
+                    <br><br>
+
+                    <button type="button" id="updateBtn">UPDATE EMPLOYEE</button>
+                    <button type="reset">RESET</button>
+                </form>
+            `;
+
+            // Attach update handler
+            document.getElementById("updateBtn").addEventListener("click", async () => {
+                const formData = new FormData(document.getElementById("employeeForm"));
+                try {
+                    const updateResponse = await fetch(`/updateEmployee/${encodeURIComponent(empId)}`, {
+                        method: "PUT",
+                        body: formData
+                    });
+                    const message = await updateResponse.text();
+                    container.innerHTML += updateResponse.ok
+                        ? `<p style="color:green;">✅ ${message}</p>`
+                        : `<p style="color:red;">${message}</p>`;
+                } catch (error) {
+                    container.innerHTML += `<p style="color:red;">Error updating employee: ${error.message}</p>`;
+                }
             });
 
-            const message = await response.text();
-            if (response.ok) {
-                employeeDetails.innerHTML = `<p style="color:green;">✅ ${message}</p>`;
-            } else {
-                employeeDetails.innerHTML = `<p style="color:red;">${message}</p>`;
-            }
-        } catch (error) {
-            employeeDetails.innerHTML = `<p style="color:red;">Error updating employee: ${error.message}</p>`;
+        } else {
+            container.innerHTML = `<p style="color:red;">❌ Employee not found.</p>`;
         }
-    });
-}
+    } catch (error) {
+        container.innerHTML = `<p style="color:red;">Error fetching employee: ${error.message}</p>`;
+    }
+});
 // ===== DELETE EMPLOYEE BY ID =====
 
 const delBtn = document.getElementById("delBtn");
