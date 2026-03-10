@@ -131,32 +131,32 @@ if (viewBtn) {
         }
     });
 }
-// // fall back to name-search
-// const searchBtn = document.getElementById('searchBtn');
-// if (searchBtn) {
-//     searchBtn.addEventListener('click', async () => {
-//         const detailsDiv = document.getElementById('employeeDetails');
-//         const empNameElem = document.getElementById('empname');
-//         if (!empNameElem) {
-//             detailsDiv.innerHTML = `<p style="color:red;">❌ Please enter an employee name.</p>`;
-//             return;
-//         }
-//         const empName = empNameElem.value.trim();
-//         if (!empName) {
-//             detailsDiv.innerHTML = `<p style="color:red;">❌ Employee name cannot be empty.</p>`;
-//             return;
-//         }
+// fall back to name-search
+const searchBtn = document.getElementById('searchBtn');
+if (searchBtn) {
+    searchBtn.addEventListener('click', async () => {
+        const detailsDiv = document.getElementById('employeeDetails');
+        const empNameElem = document.getElementById('empname');
+        if (!empNameElem) {
+            detailsDiv.innerHTML = `<p style="color:red;">❌ Please enter an employee name.</p>`;
+            return;
+        }
+        const empName = empNameElem.value.trim();
+        if (!empName) {
+            detailsDiv.innerHTML = `<p style="color:red;">❌ Employee name cannot be empty.</p>`;
+            return;
+        }
 
-//         try {
-//             const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
-//             if (!response.ok) throw new Error('Server error: ' + response.status);
-//             const employees = await response.json();
-//             renderEmployeeList(detailsDiv, employees, 'Matching Employees', `No employees found with name "${empName}".`);
-//         } catch (err) {
-//             detailsDiv.innerHTML = `<p style="color:red;">❌ Error fetching employees: ${esc(err.message)}</p>`;
-//         }
-//     });
-// }
+        try {
+            const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
+            if (!response.ok) throw new Error('Server error: ' + response.status);
+            const employees = await response.json();
+            renderEmployeeList(detailsDiv, employees, 'Matching Employees', `No employees found with name "${empName}".`);
+        } catch (err) {
+            detailsDiv.innerHTML = `<p style="color:red;">❌ Error fetching employees: ${esc(err.message)}</p>`;
+        }
+    });
+}
 
 // ===== VIEW ALL EMPLOYEES =====
 const viewAllBtn = document.getElementById('viewAllBtn');
@@ -175,6 +175,7 @@ if (viewAllBtn) {
 }
 // ===== UPDATE EMPLOYEE =====
 const updateBtn = document.getElementById("updateBtn");
+
 if (updateBtn) {
     updateBtn.addEventListener("click", async () => {
         const updateResult = document.getElementById("updateResult");
@@ -187,18 +188,33 @@ if (updateBtn) {
         }
 
         // Collect form values safely
-        const fname = document.getElementById("fname").value.trim();
-        const lname = document.getElementById("lname").value.trim();
-        const contact = document.getElementById("contact").value.trim();
-        const mail = document.getElementById("mail").value.trim();
-        const age = parseInt(document.getElementById("age").value, 10);
-        const sex = document.getElementById("sex").value.trim();
-        const degree = document.getElementById("degree").value.trim();
-        const role = document.getElementById("role").value.trim();
-        const salary = parseFloat(document.getElementById("salary").value);
+        const fnameElem = document.getElementById("fname");
+        const lnameElem = document.getElementById("lname");
+        const contactElem = document.getElementById("contact");
+        const mailElem = document.getElementById("mail");
+        const ageElem = document.getElementById("age");
+        const sexElem = document.getElementById("sex");
+        const degreeElem = document.getElementById("degree");
+        const roleElem = document.getElementById("role");
+        const salaryElem = document.getElementById("salary");
+
+        // Guard against missing fields
+        if (!fnameElem || !lnameElem || !contactElem || !mailElem || !ageElem ||
+            !sexElem || !degreeElem || !roleElem || !salaryElem) {
+            updateResult.innerHTML = `<p style="color:red;">❌ Missing one or more form fields in HTML.</p>`;
+            return;
+        }
 
         const updatedEmployee = {
-            fname, lname, contact, mail, age, sex, degree, role, salary
+            fname: fnameElem.value.trim(),
+            lname: lnameElem.value.trim(),
+            contact: contactElem.value.trim(),
+            mail: mailElem.value.trim(),
+            age: parseInt(ageElem.value, 10),
+            sex: sexElem.value.trim(),
+            degree: degreeElem.value.trim(),
+            role: roleElem.value.trim(),
+            salary: parseFloat(salaryElem.value)
         };
 
         try {
@@ -218,8 +234,7 @@ if (updateBtn) {
             updateResult.innerHTML = `<p style="color:red;">Error updating employee: ${error.message}</p>`;
         }
     });
-}
-// ===== DELETE EMPLOYEE BY ID =====
+}// ===== DELETE EMPLOYEE BY ID =====
 
 const delBtn = document.getElementById("delBtn");
 if (delBtn) {
