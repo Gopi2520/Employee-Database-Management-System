@@ -131,32 +131,32 @@ if (viewBtn) {
         }
     });
 }
-// fall back to name-search
-const searchBtn = document.getElementById('searchBtn');
-if (searchBtn) {
-    searchBtn.addEventListener('click', async () => {
-        const detailsDiv = document.getElementById('employeeDetails');
-        const empNameElem = document.getElementById('empname');
-        if (!empNameElem) {
-            detailsDiv.innerHTML = `<p style="color:red;">❌ Please enter an employee name.</p>`;
-            return;
-        }
-        const empName = empNameElem.value.trim();
-        if (!empName) {
-            detailsDiv.innerHTML = `<p style="color:red;">❌ Employee name cannot be empty.</p>`;
-            return;
-        }
+// // fall back to name-search
+// const searchBtn = document.getElementById('searchBtn');
+// if (searchBtn) {
+//     searchBtn.addEventListener('click', async () => {
+//         const detailsDiv = document.getElementById('employeeDetails');
+//         const empNameElem = document.getElementById('empname');
+//         if (!empNameElem) {
+//             detailsDiv.innerHTML = `<p style="color:red;">❌ Please enter an employee name.</p>`;
+//             return;
+//         }
+//         const empName = empNameElem.value.trim();
+//         if (!empName) {
+//             detailsDiv.innerHTML = `<p style="color:red;">❌ Employee name cannot be empty.</p>`;
+//             return;
+//         }
 
-        try {
-            const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
-            if (!response.ok) throw new Error('Server error: ' + response.status);
-            const employees = await response.json();
-            renderEmployeeList(detailsDiv, employees, 'Matching Employees', `No employees found with name "${empName}".`);
-        } catch (err) {
-            detailsDiv.innerHTML = `<p style="color:red;">❌ Error fetching employees: ${esc(err.message)}</p>`;
-        }
-    });
-}
+//         try {
+//             const response = await fetch(`/viewEmployeesByName?empname=${encodeURIComponent(empName)}`);
+//             if (!response.ok) throw new Error('Server error: ' + response.status);
+//             const employees = await response.json();
+//             renderEmployeeList(detailsDiv, employees, 'Matching Employees', `No employees found with name "${empName}".`);
+//         } catch (err) {
+//             detailsDiv.innerHTML = `<p style="color:red;">❌ Error fetching employees: ${esc(err.message)}</p>`;
+//         }
+//     });
+// }
 
 // ===== VIEW ALL EMPLOYEES =====
 const viewAllBtn = document.getElementById('viewAllBtn');
@@ -186,7 +186,7 @@ if (updateBtn) {
             return;
         }
 
-        // Collect updated fields from your form
+        // Collect form values safely
         const fname = document.getElementById("fname").value.trim();
         const lname = document.getElementById("lname").value.trim();
         const contact = document.getElementById("contact").value.trim();
@@ -219,8 +219,8 @@ if (updateBtn) {
         }
     });
 }
-
 // ===== DELETE EMPLOYEE BY ID =====
+
 const delBtn = document.getElementById("delBtn");
 if (delBtn) {
     delBtn.addEventListener("click", async () => {
