@@ -73,7 +73,7 @@ public class EmployeeController {
     @GetMapping("/viewEmployeesByName")
     @ResponseBody
     public ResponseEntity<List<Employee>> getEmployeesByName(@RequestParam String empname) {
-    List<Employee> employees = employeeService.searchByFirstName(empname);
+    List<Employee> employees = employeeService.findByFnameContainingIgnoreCase(empname);
     return employees.isEmpty()
             ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
             : ResponseEntity.ok(employees);
@@ -99,7 +99,7 @@ public class EmployeeController {
     @PutMapping("/updateEmployee/{id}")
     @ResponseBody
     public ResponseEntity<String> updateEmployee(@PathVariable int id,
-                                                 @RequestBody Employee updatedEmployee) {
+                                                @RequestBody Employee updatedEmployee) {
         return employeeRepository.findById(id)
                 .map(emp -> {
                     emp.setFname(updatedEmployee.getFname());
