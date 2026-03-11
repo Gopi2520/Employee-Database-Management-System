@@ -1,8 +1,11 @@
 package com.example.login_demo;
 import java.time.LocalDateTime;
 import java.util.Base64;
+
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,6 +13,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Transient;
 import org.hibernate.annotations.CreationTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 public class Employee {
@@ -29,6 +33,7 @@ public class Employee {
     private double salary;
 
     @Lob
+    @Basic(fetch = FetchType.LAZY)
     @JsonIgnore
     private byte[] img;
     
@@ -71,6 +76,7 @@ public class Employee {
     public void setImg(byte[] img) { this.img = img; }
 
     @Transient
+    @JsonProperty("img")
     public String getImgBase64() {
         return img != null ? Base64.getEncoder().encodeToString(img) : null;
     }

@@ -4,15 +4,20 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-	@Service
-	public class EmployeeService {
-	    @Autowired
-	    private EmployeeRepository repo;
+import org.springframework.transaction.annotation.Transactional;
 
-	    public List<Employee> findByFirstName(String fname) {
-	        return repo.findByFnameIgnoreCase(fname);
-	}
-	    public List<Employee> findByFnameContainingIgnoreCase(String fname) {
-	        return repo.findByFnameContainingIgnoreCase(fname);
-	    }
+@Service
+@Transactional
+public class EmployeeService {
+
+    @Autowired
+    private EmployeeRepository repo;
+
+    public List<Employee> findByFirstName(String fname) {
+        return repo.findByFnameIgnoreCase(fname);
+    }
+
+    public List<Employee> findByFnameContainingIgnoreCase(String fname) {
+        return repo.findByFnameContainingIgnoreCase(fname);
+    }
 }
