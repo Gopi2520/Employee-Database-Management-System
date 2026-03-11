@@ -233,9 +233,7 @@ document.getElementById("loadBtn").addEventListener("click", async () => {
                         body: formData
                     });
                     const message = await updateResponse.text();
-                    container.innerHTML += updateResponse.ok
-                        ? `<p style="color:green;">✅ ${message}</p>`
-                        : `<p style="color:red;">${message}</p>`;
+                    container.insertAdjacentHTML("beforeend", `<p style="color:green;">✅ ${message}</p>`);
                 } catch (error) {
                     container.innerHTML += `<p style="color:red;">Error updating employee: ${error.message}</p>`;
                 }
