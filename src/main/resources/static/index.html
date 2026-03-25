@@ -47,6 +47,7 @@
       /////////////////////////////////////////////////////////
       // ===== LOGIN =====
       /////////////////////////////////////////////////////////
+      const API_BASE = "https://edbm-apllication.onrender.com";
       window.addEventListener("pageshow", function (event) {
         if (sessionStorage.getItem("loggedIn")) {
           // Redirect immediately to home page
@@ -94,7 +95,6 @@
           }
         });
       }
-      const API_BASE = "https://edbm-apllication.onrender.com";
       ////for login page loading indicators
       let loginInterval;
 
