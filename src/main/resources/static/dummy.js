@@ -17,56 +17,19 @@ function esc(str) {
       )
     : "";
 }
-
-/////////////////////////////////////////////////////////
-// ===== LOGIN =====
-/////////////////////////////////////////////////////////
-
-const loginForm = document.getElementById("loginForm");
-
-if (loginForm) {
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    showLoginLoader();
-
-    try {
-      const response = await fetch(`${API_BASE}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      console.log("Status:", response.status);
-
-      if (!response.ok) {
-        throw new Error("Server error");
-      }
-
-      const data = await response.json();
-      console.log("Response:", data);
-
-      if (data.success) {
-        window.location.href = data.redirect;
-      } else {
-        alert("Invalid credentials");
-        hideLoginLoader();
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      alert("Server not reachable");
-      hideLoginLoader();
-    }
-  });
-}
+window.onload = function () {
+  // Check if the user is logged in
+  if (!sessionStorage.getItem("loggedIn")) {
+    // If not logged in, redirect to login page
+    window.location.replace("index.html");
+  }
+};
 /////////////////////////////////////////////////////////
 // ===== RENDER EMPLOYEE TABLE =====
 /////////////////////////////////////////////////////////
 
 function renderEmployeeList(container, employees, title, emptyMessage) {
+  if (!container) return;
   if (!employees || employees.length === 0) {
     container.innerHTML = `<p>${emptyMessage}</p>`;
     return;
@@ -133,31 +96,33 @@ function renderEmployeeList(container, employees, title, emptyMessage) {
 /////////////////////////////////////////////////////////
 // ===== VIEW ALL EMPLOYEES =====
 /////////////////////////////////////////////////////////
-const viewAllBtn = document.getElementById("viewAllBtn");
+document.addEventListener("DOMContentLoaded", function () {
+  const viewAllBtn = document.getElementById("viewAllBtn");
 
-if (viewAllBtn) {
-  viewAllBtn.addEventListener("click", async () => {
-    const container = document.getElementById("employeeDetails");
+  if (viewAllBtn) {
+    viewAllBtn.addEventListener("click", async () => {
+      const container = document.getElementById("employeeDetails");
 
-    showLoader();
+      showLoader();
 
-    try {
-      const response = await fetch(`${API_BASE}/viewAllEmployees`);
-      const employees = await response.json();
+      try {
+        const response = await fetch(`${API_BASE}/viewAllEmployees`);
+        const employees = await response.json();
 
-      renderEmployeeList(
-        container,
-        employees,
-        "All Employees",
-        "No employees found",
-      );
-    } catch (err) {
-      container.innerHTML = `<p style="color:red">${err.message}</p>`;
-    } finally {
-      hideLoader();
-    }
-  });
-}
+        renderEmployeeList(
+          container,
+          employees,
+          "All Employees",
+          "No employees found",
+        );
+      } catch (err) {
+        container.innerHTML = `<p style="color:red">${err.message}</p>`;
+      } finally {
+        hideLoader();
+      }
+    });
+  }
+});
 /////////////////////////////////////////////////////////
 // ===== SEARCH EMPLOYEE =====
 /////////////////////////////////////////////////////////
@@ -196,7 +161,7 @@ if (viewBtn) {
   });
 }
 /////////////////////////////////////////////////////////
-// ===== LOAD EMPLOYEE FOR UPDATE =====
+// ===== LOAD EMPLOYEE FOR DATE =====
 /////////////////////////////////////////////////////////
 
 const loadBtn = document.getElementById("loadBtn");
@@ -217,23 +182,42 @@ if (loadBtn) {
       const emp = await response.json();
 
       container.innerHTML = `
-            <form id="updateForm">
+  <form id="updateForm">
 
-            <input type="text" name="fname" value="${emp.fname}">
-            <input type="text" name="lname" value="${emp.lname}">
-            <input type="text" name="contact" value="${emp.contact}">
-            <input type="email" name="mail" value="${emp.mail}">
-            <input type="number" name="age" value="${emp.age}">
-            <input type="text" name="sex" value="${emp.sex}">
-            <input type="text" name="degree" value="${emp.degree}">
-            <input type="text" name="role" value="${emp.role}">
-            <input type="number" name="salary" value="${emp.salary}">
-            <input type="file" name="img">
+  <label>First Name</label>
+  <input type="text" name="fname" value="${emp.fname}">
 
-            <button type="submit">Update</button>
+  <label>Last Name</label>
+  <input type="text" name="lname" value="${emp.lname}">
 
-            </form>
-            `;
+  <label>Contact</label>
+  <input type="text" name="contact" value="${emp.contact}">
+
+  <label>Email</label>
+  <input type="email" name="mail" value="${emp.mail}">
+
+  <label>Age</label>
+  <input type="number" name="age" value="${emp.age}">
+
+  <label>Sex</label>
+  <input type="text" name="sex" value="${emp.sex}">
+
+  <label>Degree</label>
+  <input type="text" name="degree" value="${emp.degree}">
+
+  <label>Role</label>
+  <input type="text" name="role" value="${emp.role}">
+
+  <label>Salary</label>
+  <input type="number" name="salary" value="${emp.salary}">
+
+  <label>Image</label>
+  <input type="file" name="img">
+
+  <button type="submit">Update</button>
+
+  </form>
+`;
 
       document
         .getElementById("updateForm")
@@ -248,11 +232,13 @@ if (loadBtn) {
           });
 
           const msg = await update.text();
-
-          container.innerHTML += `<p style="color:green">${msg}</p>`;
+          document.getElementById("updateForm").style.display = "none";
+          container.innerHTML = `
+  <p style="color:green">Employee updated successfully ✅</p><br><br><button onclick="window.location.href='home.html'">Home</button>
+`;
         });
     } catch (err) {
-      container.innerHTML = `<p style="color:red">${err.message}</p>`;
+      container.innerHTML = `<p style="color:red">${err.message}</p><br><button onclick="window.location.href='home.html'">Home</button>`;
     }
   });
 }
@@ -265,56 +251,73 @@ const delBtn = document.getElementById("delBtn");
 
 if (delBtn) {
   delBtn.addEventListener("click", async () => {
-    const empId = document.getElementById("empId").value.trim();
-
-    const result = document.getElementById("deleteResult");
+    const empId = document.getElementById("empId").value;
+    const resultDiv = document.getElementById("deleteResult");
 
     if (!empId) {
-      result.innerHTML = `<p style="color:red">Enter employee ID</p>`;
+      resultDiv.innerHTML = "<p style='color:red'>Enter Employee ID</p>";
       return;
     }
+
+    showLoader();
 
     try {
       const response = await fetch(`${API_BASE}/deleteEmployee/${empId}`, {
         method: "DELETE",
       });
+      const data = await response.text();
 
-      const msg = await response.text();
-
-      result.innerHTML = `<p style="color:green">${msg}</p>`;
-    } catch (err) {
-      result.innerHTML = `<p style="color:red">${err.message}</p>`;
+      resultDiv.innerHTML = `<h2 style="font-weight: bolder;color:black">${data}<br><button onclick="window.location.href='home.html'">Home</button>
+`;
+    } catch (error) {
+      resultDiv.innerHTML = `<p style="color:red">Error deleting employee<br><button onclick="window.location.href='home.html'">Home</button>
+`;
+    } finally {
+      hideLoader();
     }
   });
 }
-
-/////////////////////////////////////////////////////////
-// ===== LOGOUT =====
-/////////////////////////////////////////////////////////
-
+///////////////Logout//////////////////////
 const logoutBtn = document.getElementById("logoutBtn");
-
 if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    window.location.href = "index.html";
+  logoutBtn.addEventListener("click", function () {
+    sessionStorage.clear();
+    window.location.replace("index.html");
   });
 }
 ////////////////page Loading indicator ///////////
 function showLoader() {
-  document.getElementById("loader").style.display = "block";
-  disableButtons();
-  startLoadingMessages();
+  const loader = document.getElementById("loader");
+
+  if (loader) {
+    loader.style.display = "flex";
+  }
+
+  if (typeof disableButtons === "function") {
+    disableButtons();
+  }
+
+  if (typeof startLoadingMessages === "function") {
+    startLoadingMessages();
+  }
 }
 
 function hideLoader() {
-  document.getElementById("loader").style.display = "none";
-  enableButtons();
-  stopLoadingMessages();
+  const loader = document.getElementById("loader");
+
+  if (loader) {
+    loader.style.display = "none";
+  }
+
+  if (typeof enableButtons === "function") {
+    enableButtons();
+  }
+
+  if (typeof stopLoadingMessages === "function") {
+    stopLoadingMessages();
+  }
 }
 ///updated loading page
-
-let loadingInterval;
-
 const messages = [
   "Loading data...",
   "Fetching employees...",
@@ -322,22 +325,26 @@ const messages = [
   "Almost there...",
   "Preparing your data...",
 ];
-
+let loadingInterval;
 function startLoadingMessages() {
-  let index = 0;
+  const textEl = document.getElementById("loadingText");
 
-  document.getElementById("loadingText").innerText = messages[index];
+  if (!textEl) return;
+
+  let index = 0;
+  textEl.innerText = messages[index];
 
   loadingInterval = setInterval(() => {
     index = (index + 1) % messages.length;
-    document.getElementById("loadingText").innerText = messages[index];
+    textEl.innerText = messages[index];
   }, 4000);
 }
 
 function stopLoadingMessages() {
-  clearInterval(loadingInterval);
-}
-///anabling and disabling buttons while the page is loading
+  if (loadingInterval) {
+    clearInterval(loadingInterval);
+  }
+} ///enabling and disabling buttons while the page is loading
 function disableButtons() {
   document.querySelectorAll("button").forEach((btn) => {
     btn.disabled = true;
@@ -348,58 +355,4 @@ function enableButtons() {
   document.querySelectorAll("button").forEach((btn) => {
     btn.disabled = false;
   });
-}
-////for login page loading indicators
-let loginInterval;
-
-const loginMessages = [
-  "Logging in...",
-  "Verifying credentials...",
-  "Connecting to server...",
-  "Almost there...",
-];
-
-function startLoginMessages() {
-  let index = 0;
-
-  document.getElementById("loginLoadingText").innerText = loginMessages[index];
-
-  loginInterval = setInterval(() => {
-    index = (index + 1) % loginMessages.length;
-    document.getElementById("loginLoadingText").innerText =
-      loginMessages[index];
-  }, 2000);
-}
-
-function stopLoginMessages() {
-  clearInterval(loginInterval);
-}
-
-function showLoginLoader() {
-  const loader = document.getElementById("loginLoader");
-  if (!loader) return;
-
-  loader.style.display = "flex";
-  disableLoginForm();
-  startLoginMessages();
-}
-
-function hideLoginLoader() {
-  const loader = document.getElementById("loginLoader");
-  if (!loader) return;
-
-  loader.style.display = "none";
-  enableLoginForm();
-  stopLoginMessages();
-}
-function disableLoginForm() {
-  document
-    .querySelectorAll("#loginForm input, #loginForm button")
-    .forEach((el) => (el.disabled = true));
-}
-
-function enableLoginForm() {
-  document
-    .querySelectorAll("#loginForm input, #loginForm button")
-    .forEach((el) => (el.disabled = false));
 }

@@ -1,60 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EMPLOYEE MANAGEMENT</title>
-    <link rel="stylesheet" href="dummy.css">
-</head>
+    <link rel="stylesheet" href="dummy.css" />
+  </head>
 
-<body>
+  <body>
     <h1>EMPLOYEE DETAILS</h1>
 
-    <form id="employeeForm" action="/uploadEmployee" method="post" enctype="multipart/form-data">
+    <form
+      id="employeeForm"
+      action="https://edbm-apllication.onrender.com/uploadEmployee"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <label>FIRST NAME <span id="star">*</span></label>
+      <input required type="text" name="fname" />
 
-        <label>FIRST NAME <span id="star">*</span></label>
-        <input required type="text" name="fname">
+      <label>LAST NAME</label>
+      <input type="text" name="lname" />
 
-        <label>LAST NAME</label>
-        <input type="text" name="lname">
+      <label>CONTACT <span id="star">*</span></label>
+      <input required type="number" name="contact" />
 
-        <label>CONTACT <span id="star">*</span></label>
-        <input required type="number" name="contact">
+      <label>MAIL</label>
+      <input type="email" name="mail" />
 
-        <label>MAIL</label>
-        <input type="email" name="mail">
+      <label>AGE <span id="star">*</span></label>
+      <input required type="number" name="age" />
 
-        <label>AGE <span id="star">*</span></label>
-        <input required type="number" name="age">
+      <label>SEX</label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" name="sex" value="male" />
+          <span>Male</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="sex" value="female" />
+          <span>Female</span>
+        </label>
+      </div>
+      <label>DEGREE <span id="star">*</span></label>
+      <input required type="text" name="degree" />
 
-        <label>SEX</label>
-        <div class="radio-group">
-            <label class="radio-option">
-                <input type="radio" name="sex" value="male">
-                <span>Male</span>
-            </label>
-            <label class="radio-option">
-                <input type="radio" name="sex" value="female">
-                <span>Female</span>
-            </label>
-        </div>
-        <label>DEGREE <span id="star">*</span></label>
-        <input required type="text" name="degree">
+      <label>ROLE <span id="star">*</span></label>
+      <input required type="text" name="role" />
 
-        <label>ROLE <span id="star">*</span></label>
-        <input required type="text" name="role">
+      <label>SALARY <span id="star">*</span></label>
+      <input required type="number" name="salary" />
 
-        <label>SALARY <span id="star">*</span></label>
-        <input required type="number" name="salary">
-
-        <label>IMAGE <span id="star">*</span></label>
-        <input required type="file" name="img">
-        <br><br>
-        <button type="submit">UPLOAD</button>
+      <label>IMAGE <span id="star">*</span></label>
+      <input required type="file" name="img" />
+      <br /><br />
+      <button type="submit">UPLOAD</button>
     </form>
     <script src="dummy.js"></script>
-
-</body>
-
+  </body>
 </html>

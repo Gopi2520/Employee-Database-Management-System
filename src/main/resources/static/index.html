@@ -37,6 +37,107 @@
       <div class="spinner"></div>
       <p id="loginLoadingText">Logging in...</p>
     </div>
-    <script src="./dummy.js"></script>
+    <script>
+      /////////////////////////////////////////////////////////
+      // ===== LOGIN =====
+      /////////////////////////////////////////////////////////
+
+      const loginForm = document.getElementById("loginForm");
+
+      if (loginForm) {
+        loginForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          showLoginLoader();
+
+          try {
+            const response = await fetch(`${API_BASE}/login`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, password }),
+            });
+
+            console.log("Status:", response.status);
+
+            if (!response.ok) {
+              throw new Error("Server error");
+            }
+
+            const data = await response.json();
+            console.log("Response:", data);
+
+            if (data.success) {
+              sessionStorage.setItem("loggedIn", "true");
+              window.location.href = data.redirect;
+            } else {
+              alert("Invalid credentials");
+              hideLoginLoader();
+            }
+          } catch (err) {
+            console.error("Login error:", err);
+            alert("Server not reachable");
+            hideLoginLoader();
+          }
+        });
+      }
+      const API_BASE = "https://edbm-apllication.onrender.com";
+      ////for login page loading indicators
+      let loginInterval;
+
+      const loginMessages = [
+        "Logging in...",
+        "Verifying credentials...",
+        "Connecting to server...",
+        "Almost there...",
+      ];
+
+      function startLoginMessages() {
+        let index = 0;
+
+        document.getElementById("loginLoadingText").innerText =
+          loginMessages[index];
+
+        loginInterval = setInterval(() => {
+          index = (index + 1) % loginMessages.length;
+          document.getElementById("loginLoadingText").innerText =
+            loginMessages[index];
+        }, 2000);
+      }
+
+      function stopLoginMessages() {
+        clearInterval(loginInterval);
+      }
+
+      function showLoginLoader() {
+        const loader = document.getElementById("loginLoader");
+        if (!loader) return;
+
+        loader.style.display = "flex";
+        disableLoginForm();
+        startLoginMessages();
+      }
+
+      function hideLoginLoader() {
+        const loader = document.getElementById("loginLoader");
+        if (!loader) return;
+
+        loader.style.display = "none";
+        enableLoginForm();
+        stopLoginMessages();
+      }
+      function disableLoginForm() {
+        document
+          .querySelectorAll("#loginForm input, #loginForm button")
+          .forEach((el) => (el.disabled = true));
+      }
+      function enableLoginForm() {
+        document
+          .querySelectorAll("#loginForm input, #loginForm button")
+          .forEach((el) => (el.disabled = false));
+      }
+    </script>
   </body>
 </html>
