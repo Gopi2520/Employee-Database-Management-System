@@ -1,25 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EMPLOYEE MANAGEMENT</title>
-    <link rel="stylesheet" href="./dummy.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head>
+    <link rel="stylesheet" href="./dummy.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
 
-<body>
+  <body>
     <form id="loginForm">
-        <label for="username">NAME</label>
-        <input id="username" type="text" placeholder="USERNAME" autocomplete="username"><br>
-        <label for="password">PASSWORD</label>
-        <input id="password" type="password" placeholder="PASSWORD" required autocomplete="current-password"><br>
-        <button type="submit">SUBMIT</button>
+      <label for="username">NAME</label>
+      <input
+        id="username"
+        type="text"
+        placeholder="USERNAME"
+        autocomplete="username"
+      /><br />
+      <label for="password">PASSWORD</label>
+      <input
+        id="password"
+        type="password"
+        placeholder="PASSWORD"
+        required
+        autocomplete="current-password"
+      /><br />
+      <button type="submit">SUBMIT</button>
     </form>
+    <div id="loginLoader" style="display: none">
+      <div class="spinner"></div>
+      <p id="loginLoadingText">Logging in...</p>
+    </div>
     <script src="./dummy.js"></script>
-</body>
-
+  </body>
 </html>
