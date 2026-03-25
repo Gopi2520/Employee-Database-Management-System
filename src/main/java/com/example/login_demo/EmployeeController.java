@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-@CrossOrigin(origins = "*")
 @Controller
 public class EmployeeController {
 
@@ -51,17 +50,6 @@ public class EmployeeController {
         return "redirect:/success.html";
     }
 
-    // ---------- VIEW BY ID (THYMELEAF) ----------
-    @GetMapping("/employee/{id}")
-    public String getEmployee(@PathVariable("id") int id, Model model) {
-
-        Employee emp = employeeRepository.findById(id).orElseThrow();
-
-        model.addAttribute("employee", emp);
-
-        return "employeeView";
-    }
-
     // ---------- DELETE ----------
     @DeleteMapping("/deleteEmployee/{id}")
     @ResponseBody
@@ -90,11 +78,31 @@ public class EmployeeController {
 
     // ---------- VIEW ALL ----------
     @GetMapping("/viewAllEmployees")
-    @ResponseBody
-    public List<Employee> viewAllEmployees() {
+public List<EmployeeDTO> viewAllEmployees() {
 
-        return employeeRepository.findAll();
-    }
+    List<Employee> employees = employeeRepository.findAll();
+
+    return employees.stream().map(emp -> {
+        EmployeeDTO dto = new EmployeeDTO();
+
+        dto.setId(emp.getId());
+        dto.setFname(emp.getFname());
+        dto.setLname(emp.getLname());
+        dto.setContact(emp.getContact());
+        dto.setMail(emp.getMail());
+        dto.setAge(emp.getAge());
+        dto.setSex(emp.getSex());
+        dto.setDegree(emp.getDegree());
+        dto.setRole(emp.getRole());
+        dto.setSalary(emp.getSalary());
+
+        if (emp.getCreatedAt() != null) {
+            dto.setCreatedAt(emp.getCreatedAt().toString());
+        }
+
+        return dto;
+    }).toList();
+}
 
     // ---------- GET BY ID (JSON) ----------
     @GetMapping("/getEmployeeById/{id}")
