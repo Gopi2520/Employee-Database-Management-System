@@ -1,12 +1,21 @@
 // ===== BASE API URL =====
-const API_BASE = window.location.origin;
+const API_BASE = "https://edbm-apllication.onrender.com";
 
 // ===== ESCAPE FUNCTION =====
 function esc(str) {
-    return str ? String(str).replace(/[&<>"']/g, s => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;",
-        "\"": "&quot;", "'": "&#39;"
-    }[s])) : "";
+  return str
+    ? String(str).replace(
+        /[&<>"']/g,
+        (s) =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          })[s],
+      )
+    : "";
 }
 
 /////////////////////////////////////////////////////////
@@ -16,37 +25,30 @@ function esc(str) {
 const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    loginForm.addEventListener("submit", async (e) => {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
 
-        e.preventDefault();
+    try {
+      const response = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
+      const data = await response.json();
 
-        try {
-
-            const response = await fetch(`${API_BASE}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                window.location.href = data.redirect;
-            }
-            else {
-                alert("Invalid credentials");
-            }
-
-        } catch (err) {
-            console.error(err);
-        }
-
-    });
-
+      if (data.success) {
+        window.location.href = data.redirect;
+      } else {
+        alert("Invalid credentials");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
 }
 
 /////////////////////////////////////////////////////////
@@ -54,13 +56,12 @@ if (loginForm) {
 /////////////////////////////////////////////////////////
 
 function renderEmployeeList(container, employees, title, emptyMessage) {
+  if (!employees || employees.length === 0) {
+    container.innerHTML = `<p>${emptyMessage}</p>`;
+    return;
+  }
 
-    if (!employees || employees.length === 0) {
-        container.innerHTML = `<p>${emptyMessage}</p>`;
-        return;
-    }
-
-    let html = `
+  let html = `
     <h2>${title}</h2>
     <table border="1">
     <thead>
@@ -81,24 +82,22 @@ function renderEmployeeList(container, employees, title, emptyMessage) {
     <tbody>
     `;
 
-    employees.forEach(emp => {
+  employees.forEach((emp) => {
+    let photo = "—";
 
-        let photo = "—";
+    if (emp.img) {
+      if (emp.img.startsWith("data:")) {
+        photo = `<img src="${emp.img}" width="80">`;
+      } else {
+        photo = `<img src="data:image/png;base64,${emp.img}" width="80">`;
+      }
+    }
 
-        if (emp.img) {
+    const created = emp.createdAt
+      ? new Date(emp.createdAt).toLocaleString()
+      : "—";
 
-            if (emp.img.startsWith("data:")) {
-                photo = `<img src="${emp.img}" width="80">`;
-            }
-            else {
-                photo = `<img src="data:image/png;base64,${emp.img}" width="80">`;
-            }
-        }
-
-        const created = emp.createdAt ?
-            new Date(emp.createdAt).toLocaleString() : "—";
-
-        html += `
+    html += `
         <tr>
         <td>${esc(emp.id)}</td>
         <td>${esc(emp.fname)} ${esc(emp.lname)}</td>
@@ -113,11 +112,11 @@ function renderEmployeeList(container, employees, title, emptyMessage) {
         <td>${photo}</td>
         </tr>
         `;
-    });
+  });
 
-    html += "</tbody></table>";
+  html += "</tbody></table>";
 
-    container.innerHTML = html;
+  container.innerHTML = html;
 }
 
 /////////////////////////////////////////////////////////
@@ -127,32 +126,24 @@ function renderEmployeeList(container, employees, title, emptyMessage) {
 const viewAllBtn = document.getElementById("viewAllBtn");
 
 if (viewAllBtn) {
+  viewAllBtn.addEventListener("click", async () => {
+    const container = document.getElementById("employeeDetails");
 
-    viewAllBtn.addEventListener("click", async () => {
+    try {
+      const response = await fetch(`${API_BASE}/viewAllEmployees`);
 
-        const container = document.getElementById("employeeDetails");
+      const employees = await response.json();
 
-        try {
-
-            const response = await fetch(`${API_BASE}/viewAllEmployees`);
-
-            const employees = await response.json();
-
-            renderEmployeeList(
-                container,
-                employees,
-                "All Employees",
-                "No employees found"
-            );
-
-        } catch (err) {
-
-            container.innerHTML = `<p style="color:red">${err.message}</p>`;
-
-        }
-
-    });
-
+      renderEmployeeList(
+        container,
+        employees,
+        "All Employees",
+        "No employees found",
+      );
+    } catch (err) {
+      container.innerHTML = `<p style="color:red">${err.message}</p>`;
+    }
+  });
 }
 
 /////////////////////////////////////////////////////////
@@ -162,40 +153,32 @@ if (viewAllBtn) {
 const viewBtn = document.getElementById("viewBtn");
 
 if (viewBtn) {
+  viewBtn.addEventListener("click", async () => {
+    const name = document.getElementById("empname").value.trim();
+    const container = document.getElementById("employeeDetails");
 
-    viewBtn.addEventListener("click", async () => {
+    if (!name) {
+      container.innerHTML = `<p style="color:red">Enter name</p>`;
+      return;
+    }
 
-        const name = document.getElementById("empname").value.trim();
-        const container = document.getElementById("employeeDetails");
+    try {
+      const response = await fetch(
+        `${API_BASE}/viewEmployeesByName?empname=${name}`,
+      );
 
-        if (!name) {
-            container.innerHTML = `<p style="color:red">Enter name</p>`;
-            return;
-        }
+      const employees = await response.json();
 
-        try {
-
-            const response =
-                await fetch(`${API_BASE}/viewEmployeesByName?empname=${name}`);
-
-            const employees = await response.json();
-
-            renderEmployeeList(
-                container,
-                employees,
-                "Matching Employees",
-                "No employee found"
-            );
-
-        } catch (err) {
-
-            container.innerHTML =
-                `<p style="color:red">${err.message}</p>`;
-
-        }
-
-    });
-
+      renderEmployeeList(
+        container,
+        employees,
+        "Matching Employees",
+        "No employee found",
+      );
+    } catch (err) {
+      container.innerHTML = `<p style="color:red">${err.message}</p>`;
+    }
+  });
 }
 
 /////////////////////////////////////////////////////////
@@ -205,26 +188,21 @@ if (viewBtn) {
 const loadBtn = document.getElementById("loadBtn");
 
 if (loadBtn) {
+  loadBtn.addEventListener("click", async () => {
+    const empId = document.getElementById("empId").value.trim();
+    const container = document.getElementById("UPemployeeDetails");
 
-    loadBtn.addEventListener("click", async () => {
+    if (!empId) {
+      container.innerHTML = `<p style="color:red">Enter employee ID</p>`;
+      return;
+    }
 
-        const empId = document.getElementById("empId").value.trim();
-        const container = document.getElementById("UPemployeeDetails");
+    try {
+      const response = await fetch(`${API_BASE}/getEmployeeById/${empId}`);
 
-        if (!empId) {
-            container.innerHTML =
-                `<p style="color:red">Enter employee ID</p>`;
-            return;
-        }
+      const emp = await response.json();
 
-        try {
-
-            const response =
-                await fetch(`${API_BASE}/getEmployeeById/${empId}`);
-
-            const emp = await response.json();
-
-            container.innerHTML = `
+      container.innerHTML = `
             <form id="updateForm">
 
             <input type="text" name="fname" value="${emp.fname}">
@@ -243,40 +221,26 @@ if (loadBtn) {
             </form>
             `;
 
-            document
-                .getElementById("updateForm")
-                .addEventListener("submit", async (e) => {
+      document
+        .getElementById("updateForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
 
-                    e.preventDefault();
+          const formData = new FormData(e.target);
 
-                    const formData =
-                        new FormData(e.target);
+          const update = await fetch(`${API_BASE}/updateEmployee/${empId}`, {
+            method: "PUT",
+            body: formData,
+          });
 
-                    const update =
-                        await fetch(`${API_BASE}/updateEmployee/${empId}`, {
+          const msg = await update.text();
 
-                            method: "PUT",
-                            body: formData
-
-                        });
-
-                    const msg = await update.text();
-
-                    container.innerHTML +=
-                        `<p style="color:green">${msg}</p>`;
-
-                });
-
-        }
-        catch (err) {
-
-            container.innerHTML =
-                `<p style="color:red">${err.message}</p>`;
-
-        }
-
-    });
-
+          container.innerHTML += `<p style="color:green">${msg}</p>`;
+        });
+    } catch (err) {
+      container.innerHTML = `<p style="color:red">${err.message}</p>`;
+    }
+  });
 }
 
 /////////////////////////////////////////////////////////
@@ -286,45 +250,28 @@ if (loadBtn) {
 const delBtn = document.getElementById("delBtn");
 
 if (delBtn) {
+  delBtn.addEventListener("click", async () => {
+    const empId = document.getElementById("empId").value.trim();
 
-    delBtn.addEventListener("click", async () => {
+    const result = document.getElementById("deleteResult");
 
-        const empId =
-            document.getElementById("empId").value.trim();
+    if (!empId) {
+      result.innerHTML = `<p style="color:red">Enter employee ID</p>`;
+      return;
+    }
 
-        const result =
-            document.getElementById("deleteResult");
+    try {
+      const response = await fetch(`${API_BASE}/deleteEmployee/${empId}`, {
+        method: "DELETE",
+      });
 
-        if (!empId) {
-            result.innerHTML =
-                `<p style="color:red">Enter employee ID</p>`;
-            return;
-        }
+      const msg = await response.text();
 
-        try {
-
-            const response =
-                await fetch(`${API_BASE}/deleteEmployee/${empId}`, {
-
-                    method: "DELETE"
-
-                });
-
-            const msg = await response.text();
-
-            result.innerHTML =
-                `<p style="color:green">${msg}</p>`;
-
-        }
-        catch (err) {
-
-            result.innerHTML =
-                `<p style="color:red">${err.message}</p>`;
-
-        }
-
-    });
-
+      result.innerHTML = `<p style="color:green">${msg}</p>`;
+    } catch (err) {
+      result.innerHTML = `<p style="color:red">${err.message}</p>`;
+    }
+  });
 }
 
 /////////////////////////////////////////////////////////
@@ -334,11 +281,7 @@ if (delBtn) {
 const logoutBtn = document.getElementById("logoutBtn");
 
 if (logoutBtn) {
-
-    logoutBtn.addEventListener("click", () => {
-
-        window.location.href = "/logout";
-
-    });
-
+  logoutBtn.addEventListener("click", () => {
+    window.location.href = "index.html";
+  });
 }
